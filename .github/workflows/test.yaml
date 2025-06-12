@@ -20,27 +20,17 @@ jobs:
 
       - name: Check for backend changes
         run: |
-          # Get the last commit before this one on main
-          PREVIOUS=$(git rev-parse HEAD^)
-          CURRENT=$(git rev-parse HEAD)
-
-          echo "Checking for changes between $PREVIOUS and $CURRENT:"
-
-          if git diff --name-only $PREVIOUS $CURRENT | grep '^backend/'; then
-            echo "BACKEND_HAS_CHANGED=true" >> "$GITHUB_ENV"
-          else
-            echo "BACKEND_HAS_CHANGED=false" >>  "$GITHUB_ENV"
-          fi
+          echo "BACKEND_HAS_CHANGED=true" >> "$GITHUB_ENV"
 
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
       - name: Deploy to staging
-        if: github.ref_name == 'main'
+        if: env.BACKEND_HAS_CHANGED == 'true'
+        # if: github.ref_name == 'main'
         run: |
-            echo '${{ github.ref_name }}'
-        # if: env.BACKEND_HAS_CHANGED == 'true'
+          echo '${{ github.ref_name }}'
         # uses: akhileshns/heroku-deploy@v3.14.15
         # with:
         #   heroku_api_key: ${{secrets.HEROKU_API_KEY}}
