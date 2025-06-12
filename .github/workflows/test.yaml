@@ -37,8 +37,9 @@ jobs:
           curl https://cli-assets.heroku.com/install.sh | sh
 
       - name: Deploy to staging
+        if: github.ref_name == 'main'
         run: |
-          echo '${{ github.ref }}'
+            echo '${{ github.ref_name }}'
         # if: env.BACKEND_HAS_CHANGED == 'true'
         # uses: akhileshns/heroku-deploy@v3.14.15
         # with:
