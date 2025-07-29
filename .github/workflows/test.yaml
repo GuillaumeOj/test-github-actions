@@ -28,6 +28,9 @@ jobs:
           else
             echo "FOO_HAS_CHANGED=false" >>  "$GITHUB_ENV"
           fi
+
+          echo '${{ toJSON(github.event)  }}'
+          echo '${{ github.event.release  }}'
   deploy:
     needs:
       - foo
