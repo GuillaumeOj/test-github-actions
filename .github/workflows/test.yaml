@@ -28,11 +28,13 @@ jobs:
           else
             echo "FOO_HAS_CHANGED=false" >>  "$GITHUB_ENV"
           fi
+
+          echo '${{ github.event.action  }}'
   deploy:
     needs:
       - foo
     runs-on: ubuntu-latest
-    if: ${{ github.event.release.action == 'released' }}
+    if: ${{ github.event.action == 'released' }}
     steps:
       - name: Pull repository
         uses: actions/checkout@v4
