@@ -2,6 +2,8 @@ name: CI
 on:
   push:
     branches: [main]
+  release:
+    types: [released]
   pull_request:
 
 jobs:
@@ -26,19 +28,11 @@ jobs:
           else
             echo "FOO_HAS_CHANGED=false" >>  "$GITHUB_ENV"
           fi
-
-
-      - name: Install Heroku CLI
-        if: env.FOO_HAS_CHANGED == 'true'
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
-      - name: Foo has changed
-        if: env.FOO_HAS_CHANGED == 'true'
-        run: |
-          echo "Changes detected in foo."
-
-      - name: Foo has not changed
-        if: env.FOO_HAS_CHANGED == 'false'
-        run: |
-          echo "No change detected in foo."
+  deploy:
+    needs:
+      - foo
+    runs-on: ubuntu-latest
+    if: ${{ github.event.release.action == 'released' }}
+    steps:
+      - name: Pull repository
+        uses: actions/checkout@v4
