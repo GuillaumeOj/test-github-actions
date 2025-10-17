@@ -1,0 +1,45 @@
+name: Merge to prod
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  merge-to-prod:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check tag type
+        id: check_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/backend-v* ]]; then
+            echo "target_branch=prod-backend" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/frontend-v* ]]; then
+            echo "target_branch=prod-frontend" >> $GITHUB_OUTPUT
+          else
+          echo "❌ ::error::Tag does not match backend-v* or frontend-v*. Skipping."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Guillaume"
+          git config --global user.email "7831777+GuillaumeOj@users.noreply.github.com"
+
+      - name: Fetch the latest changes
+        run: git fetch origin main ${{ steps.check_tag.outputs.target_branch }}
+
+      - name: Checkout prod branch
+        run: git checkout ${{ steps.check_tag.outputs.target_branch }}
+
+      - name: Merge main into prod (fast-forward if possible)
+        run: git merge --ff-only origin/main
+
+      - name: Push the changes
+        run: git push origin ${{ steps.check_tag.outputs.target_branch }}
